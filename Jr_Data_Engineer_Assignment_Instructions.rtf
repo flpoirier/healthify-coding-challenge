@@ -1,0 +1,32 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf810
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww14300\viewh12080\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 Attached you will find a CSV file consisting of 20,000 rows and 2 columns. Here is a glossary of their headers.\
+- id: an integer field as the resource site's unique identifier\
+- description: a text field with a short description of the resource site\
+\
+The problem:\
+Due to some error when processing a subset of the 20,000 resources before uploading it into our database, we mistakenly converted all of the descriptions of that subset entirely into title case (that is, first letter of each word is upper case, the rest of the word in lower case). \
+As a Jr. Data Engineer, you will be in charge of fixing that error.\
+\
+The task:\
+Write a SQL query or a set of queries, or a script in R, Python, Ruby, or any language of your choice, that identifies the affected resource site descriptions (= all descriptions that have been entirely converted into title case), and that provides the descriptions with all words in the correct casing.\
+\
+Example:\
+Your solution might have identified the following description as one that has been converted by mistake into title case. It reads:\
+The Foobar Nyc Food Pantry Serves All Populations.\
+Ideally, your solution converts the description into:\
+The Foobar NYC food pantry serves all populations.\
+\
+The result:\
+Please commit the entire code for solving this problem, the CSV file containing your remedied data, as well as any documentation you'd like to share with us to Github, and share the link to the repository with us.\
+\
+Keep in mind:\
+We are aware that this may be a challenging assignment. Hence, we are not looking for a perfect solution (in fact, we don't have one either), but for a creative solution that is able to fix most of the incorrect casings, or a solution that fixes the most obvious casing errors, or anything that you think is better than the current state of the description fields.\
+What\'92s important here is documenting your process, you\'92ll want to comment your code extensively. We want to know how you approach this problem, what difficulties you face, what limitations there are to your solutions, and the reason your approaches work or don\'92t work. \
+\
+But most importantly: Have fun!}
