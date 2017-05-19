@@ -32,4 +32,10 @@ One possible solution might be to check every word in a sentence against a dicti
 
 If there were columns of organization names and locations, another approach might be to check if those words were included in the corresponding descriptions. However, those are not included in this dataset.
 
-Most likely, it's impossible to identify organization names and locations that need capitalization without using the internet. My chosen approach is to search Google for each description.
+Most likely, it's impossible to identify organization names and locations that need capitalization without using the internet. My chosen approach is to search Google for each description and scrape the results.
+
+Now, the question becomes, what exactly should we search Google for? Since many of these descriptions were taken from the internet, a search for the entire string, in quotes, would often be successful. However, not all descriptions can be found online.
+
+Another approach might be to search Google for each individual word in the description. This would identify the proper capitalization for words like "GreenPath" or "Abilene". However, it wouldn't help with phrases like "Rose Hill Community Center".
+
+So, another possibility would be to search Google for each subset of words within a given description. However, this is subject to severe performance issues. Given a set of length n, there are (n+1)*(n/2) possible ordered subsets. (Example: Set 'ABC' contains six subsets: 'A', 'AB', 'ABC', 'B', 'BC', and 'C'.) The average affected description in the dataset is 15 words long, which means that it contains 120 possible subphrases. 120 subphrases times 920 affected descriptions comes out to 110,400 separate Google searches -- not very efficient!
