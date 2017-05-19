@@ -6,13 +6,15 @@ The data in each row gets sent to another function. The description (a string) i
 
 (Considering that 920 rows in the database (or about 5%) were affected, this means that means that this program will make 921 queries. However, it still seems smarter to do them individually, so if an error occurs, it'll only affect a single entry.)
 
+<hr>
+
 The above solution is a decent baseline fix. Here are some examples of successfully corrected entries:
 
 "Provides Licensing Of Families Who Are Interested In Becoming Foster Families." =>
 "Provides licensing of families who are interested in becoming foster families."
 
-"Patrol In A Public Area Concerning The Care And Treatment Of Animals." =>
-"Patrol in a public area concerning the care and treatment of animals."
+"Food Pantries Store Food For Those In Need And Distribute It At An Accessible Location. Eligible Participants Can Access Food For Free." =>
+"Food pantries store food for those in need and distribute it at an accessible location. Eligible participants can access food for free."
 
 However, there are still issues with proper nouns (specifically, acronyms, places, and organization names). Examples include:
 
