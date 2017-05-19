@@ -39,3 +39,7 @@ Now, the question becomes, what exactly should we search Google for? Since many 
 Another approach might be to search Google for each individual word in the description. This would identify the proper capitalization for words like "GreenPath" or "Abilene". However, it wouldn't help with phrases like "Rose Hill Community Center".
 
 So, another possibility would be to search Google for each subset of words within a given description. However, this is subject to severe performance issues. Given a set of length n, there are (n+1)*(n/2) possible ordered subsets. (Example: Set 'ABC' contains six subsets: 'A', 'AB', 'ABC', 'B', 'BC', and 'C'.) The average affected description in the dataset is 15 words long, which means that it contains 120 possible subphrases. 120 subphrases times 920 affected descriptions comes out to 110,400 separate Google searches -- not very efficient!
+
+<hr>
+
+I have chosen to combine these approaches. For each affected description, the first step is to Google the entire phrase. If it occurs on the internet, I will adopt the given capitalization. If it doesn't, I will search every subphrase as outlined above. Finally, I will run it through the baseline algorithm to ensure that every word at the beginning of a sentence is capitalized.
