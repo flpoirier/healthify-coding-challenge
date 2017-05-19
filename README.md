@@ -23,3 +23,13 @@ However, there are still issues with proper nouns (specifically, acronyms, place
 
 "The Moyock Library Has A Popular Reading Collection For Adults, Teens And Children In Addition To Numerous Special Collections." =>
 "The moyock library has a popular reading collection for adults, teens and children in addition to numerous special collections."
+
+<hr>
+
+This is a difficult problem because there is no exhaustive dictionary of proper nouns -- and even if there were, it certainly wouldn't include the names of every local organization referred to in the database.
+
+One possible solution might be to check every word in a sentence against a dictionary, and capitalize the ones that aren't present. This would help with the "Moyock" example above, but would not capitalize "Seven Hills".
+
+If there were columns of organization names and locations, another approach might be to check if those words were included in the corresponding descriptions. However, those are not included in this dataset.
+
+Most likely, it's impossible to identify organization names and locations that need capitalization without using the internet. My chosen approach is to search Google for each description.
