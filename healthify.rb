@@ -53,3 +53,5 @@ p $total_description_length / $total # avg length = 15
 # avg google queries = 120 per description
 
 # needs_fixing?(1,"Hey. I'm A Sentence! Hear Me Roar? Heck Yeah.")
+
+# how to enter a google search -- https://www.google.com/search?q=yourquery
