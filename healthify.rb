@@ -1,6 +1,6 @@
 require 'pg'
 
-$capitalized_words_and_phrases = []
+$capitalized_words_and_phrases = {}
 $descriptions_to_correct = []
 
 # the following code converts the data in the csv file to a postgresql database
@@ -36,7 +36,6 @@ def split_into_sentences(description)
 end
 
 def process_description(id, description)
-  p description
   sentences = split_into_sentences(description)
   needs_correcting = true
   cap_words_and_phrases = []
@@ -44,14 +43,12 @@ def process_description(id, description)
     sentence = sentence.split(" ")
     phrase = ""
     sentence.each_with_index do |word,idx|
-      if word == word.downcase && idx == 1
+      if word == word.downcase && word.to_i == 0 && idx == 1
         needs_correcting = false
         phrase = ""
-      elsif word == word.downcase
+      elsif word == word.downcase && word.to_i == 0
         needs_correcting = false
-        if phrase.length > 0 #&& (word == "and" || word == "the" || word == "of")
-        #   phrase += word += " "
-        # elsif phrase.length > 0
+        if phrase.length > 0
           cap_words_and_phrases << phrase.slice(0...-1)
           phrase = ""
         end
@@ -62,11 +59,9 @@ def process_description(id, description)
     phrase.length > 0 ? cap_words_and_phrases << phrase.slice(0...-1) : nil
   end
   if needs_correcting
-    p description
     $descriptions_to_correct << {id: id, description: description}
   else
-    p cap_words_and_phrases
-    $capitalized_words_and_phrases << cap_words_and_phrases
+    cap_words_and_phrases.each { |word| $capitalized_words_and_phrases[word.downcase] = word }
   end
 end
 
@@ -96,9 +91,12 @@ drop_db
 create_db
 check_rows
 
-p $capitalized_words_and_phrases.flatten.uniq.sort
-p $capitalized_words_and_phrases.flatten.uniq.length
+p $capitalized_words_and_phrases.sort
+p $capitalized_words_and_phrases.length
 p $descriptions_to_correct.length
+
+p $capitalized_words_and_phrases["nyc"]
+p $capitalized_words_and_phrases["feather"]
 
 # avg word length = 15
 # avg google queries = 120 per description
