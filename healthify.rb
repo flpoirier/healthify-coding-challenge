@@ -1,6 +1,7 @@
 require 'pg'
 
-$capitalized_words_and_phrases = {}
+$capitalized_words_and_phrases = []
+$descriptions_to_correct = []
 
 # the following code converts the data in the csv file to a postgresql database
 
@@ -21,7 +22,7 @@ def check_rows
   conn = PG.connect(dbname: 'healthify')
   result = conn.exec("SELECT * FROM orgs")
   result.each do |row|
-    needs_fixing?(row["id"], row["description"])
+    process_description(row["id"], row["description"])
   end
 end
 
@@ -35,18 +36,22 @@ def split_into_sentences(description)
 end
 
 def process_description(id, description)
+  p description
   sentences = split_into_sentences(description)
   needs_correcting = true
   cap_words_and_phrases = []
   sentences.each do |sentence|
     sentence = sentence.split(" ")
     phrase = ""
-    sentence.each do |word|
-      if word == word.downcase
+    sentence.each_with_index do |word,idx|
+      if word == word.downcase && idx == 1
         needs_correcting = false
-        if phrase.length > 0 && (word == "and" || word == "the" || word == "of")
-          phrase += word += " "
-        elsif phrase.length > 0
+        phrase = ""
+      elsif word == word.downcase
+        needs_correcting = false
+        if phrase.length > 0 #&& (word == "and" || word == "the" || word == "of")
+        #   phrase += word += " "
+        # elsif phrase.length > 0
           cap_words_and_phrases << phrase.slice(0...-1)
           phrase = ""
         end
@@ -56,8 +61,13 @@ def process_description(id, description)
     end
     phrase.length > 0 ? cap_words_and_phrases << phrase.slice(0...-1) : nil
   end
-  p description
-  p cap_words_and_phrases
+  if needs_correcting
+    p description
+    $descriptions_to_correct << {id: id, description: description}
+  else
+    p cap_words_and_phrases
+    $capitalized_words_and_phrases << cap_words_and_phrases
+  end
 end
 
 def needs_fixing?(id, description)
@@ -82,13 +92,14 @@ end
 def insert_correct_description(id, description)
 end
 
-# drop_db
-# create_db
-# check_rows
+drop_db
+create_db
+check_rows
+
+p $capitalized_words_and_phrases.flatten.uniq.sort
+p $capitalized_words_and_phrases.flatten.uniq.length
+p $descriptions_to_correct.length
 
 # avg word length = 15
 # avg google queries = 120 per description
-
-process_description(34, "Feather lane Poirier, Alumna Emeritus from the University of Rhode Island")
-
 # how to enter a google search -- https://www.google.com/search?q=yourquery
