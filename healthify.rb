@@ -64,6 +64,9 @@ def process_description(id, description)
   if needs_correcting
     $descriptions_to_correct << {id: id, description: description}
   else
+    if cap_words_and_phrases.include?("Resource")
+      p description
+    end
     cap_words_and_phrases.each { |word| $capitalized_words_and_phrases[word.downcase] = word }
   end
 end
@@ -83,10 +86,13 @@ def needs_fixing(id, description)
     new_description[idx] = word # finally, we replace the word in the description with the corrected word
   end
 
-
+  new_description = new_description.join(" ")
+  desc_and_punc = trim_punctuation(new_description)
+  sentences = sentence_subsets(desc_and_punc[:description])
+  new_description = restore_punctuation(sentences, desc_and_punc[:punctuation])
 
   p description.join(" ")
-  p new_description.join(" ")
+  p new_description
   insert_correct_description(id, description.join(" ")) # if we haven't returned by this point, we know the description needs fixing
 end
 
@@ -112,9 +118,9 @@ def sentence_subsets(description)
   description = description.split(" ")
   idx1 = 0
   while idx1 < description.length
-    idx2 = idx1
+    idx2 = idx1 + 1
     while idx2 < description.length
-      subset = description[idx1..idx2].join(" ")
+      subset = description[idx1..idx2].join(" ").downcase
       correct_subset = $capitalized_words_and_phrases[subset]
       if correct_subset
         correct_subset.split(" ").each_with_index do |word,idx|
@@ -135,17 +141,11 @@ drop_db
 create_db
 check_rows
 
-# p $capitalized_words_and_phrases.sort
+p $capitalized_words_and_phrases.sort
 # p $capitalized_words_and_phrases.length
 # p $descriptions_to_correct.length
 
-p $capitalized_words_and_phrases["moyock"]
-string = "I love clark county very, very much. i love nyc."
-obj = trim_punctuation(string)
-p obj
-desc = sentence_subsets(obj[:description])
-p desc
-p restore_punctuation(desc, obj[:punctuation])
+sentence_subsets("apple banana clementine")
 
 # avg word length = 15
 # avg google queries = 120 per description
