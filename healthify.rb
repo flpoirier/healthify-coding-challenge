@@ -24,6 +24,9 @@ def check_rows
   result.each do |row|
     process_description(row["id"], row["description"])
   end
+  $descriptions_to_correct.each do |organization|
+    needs_fixing(organization[:id], organization[:description])
+  end
 end
 
 def split_into_sentences(description)
@@ -65,12 +68,12 @@ def process_description(id, description)
   end
 end
 
-def needs_fixing?(id, description)
+def needs_fixing(id, description)
   description = description.split(" ") # description is split into an array of individual words
   new_description = []
   next_word_caps = true # the first word in the description should always be capitalized
+
   description.each_with_index do |word,idx|
-    return if word == word.downcase # if any word in the description is lowercase, we know the description wasn't affected, and we can exit the function
     word = word.downcase # default action is to downcase the word.
     if next_word_caps
       word = word.capitalize # word gets capitalized if it's at beginning of a new sentence
@@ -79,9 +82,22 @@ def needs_fixing?(id, description)
     /\?|\.|\!/.match(word[-1]) ? next_word_caps = true : nil # if a word ends in "?", ".", or "!", we know it's at the end of a sentence, and the next word should be capitalized
     new_description[idx] = word # finally, we replace the word in the description with the corrected word
   end
+
   p description.join(" ")
   p new_description.join(" ")
   insert_correct_description(id, description.join(" ")) # if we haven't returned by this point, we know the description needs fixing
+end
+
+def sentence_subsets(description)
+  idx1 = 0
+  while idx1 < description.length
+    idx2 = idx1
+    while idx2 < description.length
+      p description[idx1..idx2].join(" ")
+      idx2 += 1
+    end
+    idx1 += 1
+  end
 end
 
 def insert_correct_description(id, description)
@@ -91,12 +107,11 @@ drop_db
 create_db
 check_rows
 
-p $capitalized_words_and_phrases.sort
-p $capitalized_words_and_phrases.length
-p $descriptions_to_correct.length
+# p $capitalized_words_and_phrases.sort
+# p $capitalized_words_and_phrases.length
+# p $descriptions_to_correct.length
 
-p $capitalized_words_and_phrases["nyc"]
-p $capitalized_words_and_phrases["feather"]
+p $capitalized_words_and_phrases["clark county"]
 
 # avg word length = 15
 # avg google queries = 120 per description
