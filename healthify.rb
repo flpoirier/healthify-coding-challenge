@@ -1,16 +1,20 @@
 require 'pg'
 
+$capitalized_words_and_phrases = {}
+
 # the following code converts the data in the csv file to a postgresql database
 
-$total = 0
-$total_description_length = 0
-
 def create_db
-  # conn = PG.connect(dbname: 'postgres')
-  # conn.exec("CREATE DATABASE healthify")
+  conn = PG.connect(dbname: 'postgres')
+  conn.exec("CREATE DATABASE healthify")
   conn = PG.connect(dbname: 'healthify')
-  # conn.exec("CREATE TABLE orgs ( id INT, description VARCHAR, PRIMARY KEY (id) )")
+  conn.exec("CREATE TABLE orgs ( id INT, description VARCHAR, PRIMARY KEY (id) )")
   conn.exec("COPY orgs(id, description) FROM '/Users/appacademy/Desktop/healthify-coding-challenge/jr_data_engineer_assignment.csv' DELIMITER ',' CSV HEADER")
+end
+
+def drop_db
+  conn = PG.connect(dbname: 'postgres')
+  conn.exec("DROP DATABASE healthify")
 end
 
 def check_rows
@@ -19,6 +23,16 @@ def check_rows
   result.each do |row|
     needs_fixing?(row["id"], row["description"])
   end
+end
+
+def split_into_sentences(description)
+  p description
+  description = description.split(". ")
+  description.map! { |sentence| sentence.split("! ") }.flatten!
+  description.map! { |sentence| sentence.split("? ") }.flatten!
+  description.map! { |sentence| sentence.split(", ") }.flatten!
+  /\?|\.|\!/.match(description[-1][-1]) ? description[-1] = description[-1].slice(0...-1) : nil
+  p description
 end
 
 def needs_fixing?(id, description)
@@ -35,23 +49,21 @@ def needs_fixing?(id, description)
     /\?|\.|\!/.match(word[-1]) ? next_word_caps = true : nil # if a word ends in "?", ".", or "!", we know it's at the end of a sentence, and the next word should be capitalized
     new_description[idx] = word # finally, we replace the word in the description with the corrected word
   end
-  # p id + " " + description.join(" ")
   p description.join(" ")
   p new_description.join(" ")
-  $total += 1
-  $total_description_length += description.length
   insert_correct_description(id, description.join(" ")) # if we haven't returned by this point, we know the description needs fixing
 end
 
 def insert_correct_description(id, description)
 end
 
+# drop_db
 # create_db
-check_rows
-p $total
-p $total_description_length / $total # avg length = 15
+# check_rows
+
+# avg word length = 15
 # avg google queries = 120 per description
 
-# needs_fixing?(1,"Hey. I'm A Sentence! Hear Me Roar? Heck Yeah.")
+split_into_sentences("Hey. I'm A Sentence! Hear Me Roar, yeah, Heck Yeah? Yeah boi!")
 
 # how to enter a google search -- https://www.google.com/search?q=yourquery
