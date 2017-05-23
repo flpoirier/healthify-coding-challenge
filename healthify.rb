@@ -26,13 +26,32 @@ def check_rows
 end
 
 def split_into_sentences(description)
-  p description
   description = description.split(". ")
   description.map! { |sentence| sentence.split("! ") }.flatten!
   description.map! { |sentence| sentence.split("? ") }.flatten!
   description.map! { |sentence| sentence.split(", ") }.flatten!
   /\?|\.|\!/.match(description[-1][-1]) ? description[-1] = description[-1].slice(0...-1) : nil
-  p description
+  description
+end
+
+def process_description(id, description)
+  sentences = split_into_sentences(description)
+  needs_correcting = true
+  cap_words_and_phrases = []
+  sentences.each do |sentence|
+    sentence = sentence.split(" ")
+    phrase = ""
+    sentence.each do |word|
+      if word == word.downcase
+        needs_correcting = false
+        phrase.length > 0 ? cap_words_and_phrases << phrase.slice(0...-1) : nil
+        phrase = ""
+      else
+        phrase += word += " "
+      end
+    end
+    phrase.length > 0 ? cap_words_and_phrases << phrase.slice(0...-1) : nil
+  end
 end
 
 def needs_fixing?(id, description)
@@ -64,6 +83,6 @@ end
 # avg word length = 15
 # avg google queries = 120 per description
 
-split_into_sentences("Hey. I'm A Sentence! Hear Me Roar, yeah, Heck Yeah? Yeah boi!")
+process_description(34, "Hey. I'm A Sentence! Hear Me Roar, yeah, Heck Yeah? Yeah boi!")
 
 # how to enter a google search -- https://www.google.com/search?q=yourquery
