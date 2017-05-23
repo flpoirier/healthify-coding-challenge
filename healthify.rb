@@ -2,6 +2,7 @@ require 'pg'
 
 $capitalized_words_and_phrases = {}
 $descriptions_to_correct = []
+$all_correct_descriptions = ""
 
 # the following code converts the data in the csv file to a postgresql database
 
@@ -64,9 +65,7 @@ def process_description(id, description)
   if needs_correcting
     $descriptions_to_correct << {id: id, description: description}
   else
-    if cap_words_and_phrases.include?("Resource")
-      p description
-    end
+    $all_correct_descriptions += description += " "
     cap_words_and_phrases.each { |word| $capitalized_words_and_phrases[word.downcase] = word }
   end
 end
@@ -141,7 +140,7 @@ drop_db
 create_db
 check_rows
 
-p $capitalized_words_and_phrases.sort
+p $all_correct_descriptions
 # p $capitalized_words_and_phrases.length
 # p $descriptions_to_correct.length
 
