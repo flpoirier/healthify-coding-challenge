@@ -97,12 +97,19 @@ def trim_punctuation(description)
     /\?|\.|\!|\,/.match(word[-1]) ? letter = word.slice!(-1) : letter = ""
     punctuation[idx] = letter
   end
-  p description.join(" ")
-  p punctuation
+  { description: description.join(" "), punctuation: punctuation }
+end
+
+def restore_punctuation(description, punctuation)
+  description = description.split(" ")
+  description.each_with_index do |word,idx|
+    description[idx] = word + punctuation[idx]
+  end
+  description.join(" ")
 end
 
 def sentence_subsets(description)
-  p description
+  description = description.split(" ")
   idx1 = 0
   while idx1 < description.length
     idx2 = idx1
@@ -118,7 +125,7 @@ def sentence_subsets(description)
     end
     idx1 += 1
   end
-  p description.join(" ")
+  description.join(" ")
 end
 
 def insert_correct_description(id, description)
@@ -134,7 +141,11 @@ check_rows
 
 p $capitalized_words_and_phrases["moyock"]
 string = "I love clark county very, very much. i love nyc."
-trim_punctuation(string)
+obj = trim_punctuation(string)
+p obj
+desc = sentence_subsets(obj[:description])
+p desc
+p restore_punctuation(desc, obj[:punctuation])
 
 # avg word length = 15
 # avg google queries = 120 per description
