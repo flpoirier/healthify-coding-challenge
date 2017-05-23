@@ -44,14 +44,20 @@ def process_description(id, description)
     sentence.each do |word|
       if word == word.downcase
         needs_correcting = false
-        phrase.length > 0 ? cap_words_and_phrases << phrase.slice(0...-1) : nil
-        phrase = ""
+        if phrase.length > 0 && (word == "and" || word == "the" || word == "of")
+          phrase += word += " "
+        elsif phrase.length > 0
+          cap_words_and_phrases << phrase.slice(0...-1)
+          phrase = ""
+        end
       else
         phrase += word += " "
       end
     end
     phrase.length > 0 ? cap_words_and_phrases << phrase.slice(0...-1) : nil
   end
+  p description
+  p cap_words_and_phrases
 end
 
 def needs_fixing?(id, description)
@@ -83,6 +89,6 @@ end
 # avg word length = 15
 # avg google queries = 120 per description
 
-process_description(34, "Hey. I'm A Sentence! Hear Me Roar, yeah, Heck Yeah? Yeah boi!")
+process_description(34, "Feather lane Poirier, Alumna Emeritus from the University of Rhode Island")
 
 # how to enter a google search -- https://www.google.com/search?q=yourquery
