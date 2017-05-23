@@ -83,11 +83,22 @@ def needs_fixing(id, description)
     new_description[idx] = word # finally, we replace the word in the description with the corrected word
   end
 
-  
+
 
   p description.join(" ")
   p new_description.join(" ")
   insert_correct_description(id, description.join(" ")) # if we haven't returned by this point, we know the description needs fixing
+end
+
+def trim_punctuation(description)
+  description = description.split(" ")
+  punctuation = {}
+  description.each_with_index do |word,idx|
+    /\?|\.|\!|\,/.match(word[-1]) ? letter = word.slice!(-1) : letter = ""
+    punctuation[idx] = letter
+  end
+  p description.join(" ")
+  p punctuation
 end
 
 def sentence_subsets(description)
@@ -121,9 +132,9 @@ check_rows
 # p $capitalized_words_and_phrases.length
 # p $descriptions_to_correct.length
 
-p $capitalized_words_and_phrases["clark county"]
+p $capitalized_words_and_phrases["moyock"]
 string = "I love clark county very, very much. i love nyc."
-p sentence_subsets(string.split(" "))
+trim_punctuation(string)
 
 # avg word length = 15
 # avg google queries = 120 per description
