@@ -46,7 +46,8 @@ def check_frequencies
       phrase = phrase[0]
       downcase = $all_correct_descriptions.scan(/(?=#{" " + phrase.downcase + " "})/).count
       capitalized = $all_correct_descriptions.scan(/(?=#{" " + phrase.capitalize + " "})/).count
-      uppercase = $all_correct_descriptions.scan(/(?=#{" " + phrase.upcase + " ")})/).count
+      uppercase = $all_correct_descriptions.scan(/(?=#{" " + phrase.upcase + " "})/).count
+      phrase = phrase.split(" ")
     else
       downcase = $all_correct_descriptions.scan(/(?=#{phrase.map(&:downcase).join(" ")})/).count
       capitalized = $all_correct_descriptions.scan(/(?=#{phrase.map(&:capitalize).join(" ")})/).count
