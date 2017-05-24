@@ -185,7 +185,7 @@ end
 # p $capitalized_words_and_phrases.length
 # p $descriptions_to_correct.length
 #
-p sentence_subsets("The Ossining Food Pantry Distributes Food To The Needy In The Parish Of Hall Of Trinity Episcopal Church.")
+p sentence_subsets("The Moyock Library Has A Popular Reading Collection For Adults, Teens And Children In Addition To Numerous Special Collections.")
 
 # avg word length = 15
 # avg google queries = 120 per description

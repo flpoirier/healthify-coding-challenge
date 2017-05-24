@@ -43,3 +43,34 @@ So, another possibility would be to search Google for each subset of words withi
 <hr>
 
 I have chosen to combine these approaches. For each affected description, the first step is to Google the entire phrase. If it occurs on the internet, I will adopt the given capitalization. If it doesn't, I will search every subphrase as outlined above. Finally, I will run it through the baseline algorithm to ensure that every word at the beginning of a sentence is capitalized.
+
+<hr>
+
+More examples:
+
+The Sendero Program Is Specifically For Latino Consumers Whose Primary Language Is Spanish. =>
+The Sendero program is specifically for Latino consumers whose primary language is Spanish.
+
+Currently Screening For Waiting List. Single Women With Children Only. =>
+Currently screening for waiting list. Single women with children only.
+
+Food Pantry By Appointment On Tuesdays And Thursdays. =>
+Food pantry by appointment on Tuesdays and Thursdays.
+
+Aarp Tax Preparation Assistance For Low Income Individuals And Families With Simple Tax Forms. =>
+AARP tax preparation assistance for low income individuals and families with simple tax forms.
+
+This Library Provides Book Loans And Story Hour. =>
+This library Provides book loans and story hour.
+
+Provides Liheap And Emergency Utility Assistance, Distributes Usda Commodities And Senior Aid Program That Offers Job Training For Persons 55 And Older Seeking New Employment. =>
+Provides LIHEAP and emergency utility assistance, distributes USDA commodities and senior aid program that Offers job training for persons 55 and older seeking new employment.
+
+The Eureka Senior Center Serves Congregate Meals Daily. =>
+The Eureka Senior Center Serves congregate meals daily.
+
+Information On Alcoholics Anonymous Meetings In Nebraska, Available By Telephone Or Online =>
+Information on Alcoholics Anonymous meetings in Nebraska, available by telephone or online
+
+Free Pregnancy Testingfree Pregnancy Counselingpost Abortion Counselingabstinence Educationspecialized Information And Referralvolunteer Based Center =>
+Free pregnancy Testingfree pregnancy Counselingpost abortion Counselingabstinence Educationspecialized information and Referralvolunteer based Center
