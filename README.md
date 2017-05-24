@@ -40,7 +40,23 @@ I chose a three-step approach to this problem:
 
 This multipronged approach is much more successful than the naive approach alone. Here are some examples of successfully corrected entries:
 
-[insert entries here]
+"Provides Food Boxes On A Monthly Basis To Needy Families In Lemoore." =>
+"Provides food boxes on a monthly basis to needy families in Lemoore."
+
+"Provides Testing For Sexually Transmitted Diseases And Hiv. Referred Out For Hepatitis C Testing." =>
+"Provides testing for sexually transmitted diseases and HIV. Referred out for Hepatitis C testing."
+
+"Provides Home Health And Hospice Services To Residents Of Alleghany, Ashe And Watauga Counties." =>
+"Provides home health and hospice services to residents of Alleghany, Ashe and Watauga counties."
+
+"The Sendero Program Is Specifically For Latino Consumers Whose Primary Language Is Spanish." =>
+"The Sendero program is specifically for Latino consumers whose primary language is Spanish."
+
+"Food Pantry By Appointment On Tuesdays And Thursdays." =>
+"Food pantry by appointment on Tuesdays and Thursdays."
+
+"Reach Provides Aoda Services Including Assessment And Diagnostic Evaluations Alcohol And Drug Treatment Groups And Owi Education Groups." =>
+"Reach provides AODA services including assessment and diagnostic evaluations alcohol and drug treatment groups and OWI education groups."
 
 However, it does have limitations:
 
@@ -51,3 +67,11 @@ However, it does have limitations:
 3. Some words are both acronyms and normal words (ex: 'aids' / 'AIDS'; 'add' / 'ADD'). The code can't distinguish between them.
 
 4. Some phrases don't appear in the database enough to be analyzed. (Ex: "Seven Hills" only occurs once, and since it's a phrase composed of regular words, it doesn't get corrected.)
+
+5. It doesn't deal properly with phrases with hybrid capitalization (ex: the program analyzes "GED preparation" as "ged preparation").
+
+It might be possible to address some of these concerns by analyzing even larger text samples (perhaps scraped from books and news sites). However, that would make the code run even more slowly. This solution is imperfect but (I think) sufficient.
+
+<hr>
+
+Another approach I seriously considered was searching the internet for each affected description. A random sample suggests that at least half of them are accessible via Google Search -- this would be a good way of retrieving the original capitalization. The problem with this is that Google limits searches to 100 / day, and charges for any additional searches. (It's probably possible to get around this limit by using proxies, but I considered that beyond the scope of this coding challenge.)
