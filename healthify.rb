@@ -9,6 +9,7 @@ $dictionary = File.open("./words.txt").read.split("\n").to_set
 # the following code converts the data in the csv file to a postgresql database
 
 def create_db
+  puts "\nCreating database...\n"
   conn = PG.connect(dbname: 'postgres')
   conn.exec("CREATE DATABASE healthify")
   conn = PG.connect(dbname: 'healthify')
@@ -22,41 +23,62 @@ def drop_db
 end
 
 def check_rows
+  puts "\nProcessing entries...\n\n"
+
   conn = PG.connect(dbname: 'healthify')
   result = conn.exec("SELECT * FROM orgs")
-  result.each do |row|
+
+  current_percent = 0
+  total_keys = 20000
+
+  result.each_with_index do |row,idx|
+    if idx > (current_percent * total_keys / 100)
+      puts "#{current_percent}% checked..."
+      current_percent += 1
+    end
     process_description(row["id"], row["description"])
   end
+
+  puts "\nEntries processed!\n"
+
   check_frequencies
+
   $descriptions_to_correct.each do |organization|
     needs_fixing(organization[:id], organization[:description])
   end
 end
 
 def check_frequencies
-  puts "Checking for capitalization frequencies..."
+  puts "\nChecking for capitalization frequencies...\n\n"
   current_percent = 0
   total_keys = $capitalized_words_and_phrases.keys.length
+  # I create a new, empty hash so as to not edit the original hash while iterating over it
   new_cap_words_and_phrases = {}
   $capitalized_words_and_phrases.keys.each_with_index do |phrase,idx|
     # This method is the performance bottleneck. It takes about eight minutes.
     # Printing progress updates shows that the program hasn't just frozen.
-    if idx > (current_percent * 72)
+    if idx > (current_percent * total_keys / 100)
       puts "#{current_percent}% checked..."
       current_percent += 1
     end
     phrase = phrase.split(" ")
     if phrase.length == 1
+      # if a phrase is only one word long, I search the correct descriptions for the phrase with a space on either side
+      # because words like "NY" or "GED" will return a lot of false positives otherwise (ex: company, many, challenged, managed)
       phrase = phrase[0]
       downcase = $all_correct_descriptions.scan(/(?=#{" " + phrase.downcase + " "})/).count
       capitalized = $all_correct_descriptions.scan(/(?=#{" " + phrase.capitalize + " "})/).count
       uppercase = $all_correct_descriptions.scan(/(?=#{" " + phrase.upcase + " "})/).count
       phrase = phrase.split(" ")
     else
+      # the point of this is essentially to search all the unaffected descriptions (~19,000) for the number of
+      # lowercase, uppercase, and titlecase instances of each phrase. (ex: "nyc", "NYC", and "Nyc")
       downcase = $all_correct_descriptions.scan(/(?=#{phrase.map(&:downcase).join(" ")})/).count
       capitalized = $all_correct_descriptions.scan(/(?=#{phrase.map(&:capitalize).join(" ")})/).count
       uppercase = $all_correct_descriptions.scan(/(?=#{phrase.map(&:upcase).join(" ")})/).count
     end
+    # then, each word or phrase is added to the hash. the key is the lowercase word/phrase
+    # and the value is its most common form (either lower, upper or titlecase)
     if (capitalized >= downcase) && (capitalized >= uppercase)
       new_cap_words_and_phrases[phrase.join(" ")] = phrase.map(&:capitalize).join(" ")
     elsif (uppercase >= downcase) && (uppercase >= capitalized)
@@ -65,7 +87,8 @@ def check_frequencies
       new_cap_words_and_phrases[phrase.join(" ")] = phrase.map(&:downcase).join(" ")
     end
   end
-  puts "Frequency checking complete!"
+  puts "\nFrequency checking complete!\n"
+  # then, the global variable is reset to
   $capitalized_words_and_phrases = new_cap_words_and_phrases
 end
 
@@ -104,7 +127,13 @@ def process_description(id, description)
   if needs_correcting
     $descriptions_to_correct << {id: id, description: description}
   else
-    $all_correct_descriptions += description += " "
+    sentences.each do |sentence|
+      sentence = sentence.split(" ")
+      if sentence[1] && (sentence[1] == sentence[1].downcase)
+        sentence[0][0] = sentence[0][0].downcase
+      end
+      $all_correct_descriptions += sentence.join(" ") + " "
+    end
     cap_words_and_phrases.each { |word| $capitalized_words_and_phrases[word.downcase] = word }
   end
 end
@@ -177,15 +206,16 @@ end
 def insert_correct_description(id, description)
 end
 
-# drop_db
-# create_db
-# check_rows
-#
-# p $capitalized_words_and_phrases.sort
+drop_db
+create_db
+check_rows
+
+p $capitalized_words_and_phrases.sort
 # p $capitalized_words_and_phrases.length
 # p $descriptions_to_correct.length
 #
-p sentence_subsets("The Moyock Library Has A Popular Reading Collection For Adults, Teens And Children In Addition To Numerous Special Collections.")
+# string = "This is my sentence. This is another sentence! This is a third sentence."
+# p split_into_sentences(string)
 
 # avg word length = 15
 # avg google queries = 120 per description
