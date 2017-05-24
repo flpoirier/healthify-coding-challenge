@@ -25,9 +25,21 @@ def check_rows
   result.each do |row|
     process_description(row["id"], row["description"])
   end
+  check_frequencies
   $descriptions_to_correct.each do |organization|
     needs_fixing(organization[:id], organization[:description])
   end
+end
+
+def check_frequencies
+  new_cap_words_and_phrases = {}
+  $capitalized_words_and_phrases.keys.each do |word|
+    downcase = $all_correct_descriptions.scan(/(?=#{word.downcase})/).count
+    capitalized = $all_correct_descriptions.scan(/(?=#{word.capitalize})/).count
+    uppercase = $all_correct_descriptions.scan(/(?=#{word.downcase})/).count
+    new_cap_words_and_phrases[word] = { downcase: downcase, upcase: uppercase, capital: capitalized }
+  end
+  $capitalized_words_and_phrases = new_cap_words_and_phrases
 end
 
 def split_into_sentences(description)
@@ -117,7 +129,7 @@ def sentence_subsets(description)
   description = description.split(" ")
   idx1 = 0
   while idx1 < description.length
-    idx2 = idx1 + 1
+    idx2 = idx1
     while idx2 < description.length
       subset = description[idx1..idx2].join(" ").downcase
       correct_subset = $capitalized_words_and_phrases[subset]
@@ -140,7 +152,7 @@ drop_db
 create_db
 check_rows
 
-p $all_correct_descriptions
+p $capitalized_words_and_phrases.sort
 # p $capitalized_words_and_phrases.length
 # p $descriptions_to_correct.length
 
