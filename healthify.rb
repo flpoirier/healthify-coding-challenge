@@ -42,9 +42,16 @@ def check_frequencies
       current_percent += 1
     end
     phrase = phrase.split(" ")
-    downcase = $all_correct_descriptions.scan(/(?=#{phrase.map(&:downcase).join(" ")})/).count
-    capitalized = $all_correct_descriptions.scan(/(?=#{phrase.map(&:capitalize).join(" ")})/).count
-    uppercase = $all_correct_descriptions.scan(/(?=#{phrase.map(&:upcase).join(" ")})/).count
+    if phrase.length == 1
+      phrase = phrase[0]
+      downcase = $all_correct_descriptions.scan(/(?=#{" " + phrase.downcase + " "})/).count
+      capitalized = $all_correct_descriptions.scan(/(?=#{" " + phrase.capitalize + " "})/).count
+      uppercase = $all_correct_descriptions.scan(/(?=#{" " + phrase.upcase + " ")})/).count
+    else
+      downcase = $all_correct_descriptions.scan(/(?=#{phrase.map(&:downcase).join(" ")})/).count
+      capitalized = $all_correct_descriptions.scan(/(?=#{phrase.map(&:capitalize).join(" ")})/).count
+      uppercase = $all_correct_descriptions.scan(/(?=#{phrase.map(&:upcase).join(" ")})/).count
+    end
     if (capitalized >= downcase) && (capitalized >= uppercase)
       new_cap_words_and_phrases[phrase.join(" ")] = phrase.map(&:capitalize).join(" ")
     elsif (uppercase >= downcase) && (uppercase >= capitalized)
