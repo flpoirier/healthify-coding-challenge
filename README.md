@@ -26,4 +26,16 @@ However, there are still issues with proper nouns (specifically, acronyms, place
 
 <hr>
 
-This is a difficult problem because there is no exhaustive dictionary of proper nouns -- and even if there were, it certainly wouldn't include the names of every local organization referred to in the database.
+This is a difficult problem because there is no exhaustive dictionary of proper nouns -- and even if there were, it certainly wouldn't include the names of every local organization referred to in the database. However, we have one advantage: 19,000 unaffected descriptions. Many organizations, acronyms, and places are referred to more than once in the database. Therefore, analysis of the unaffected descriptions can help guide correction of the affected descriptions.
+
+I chose a three-step approach to this problem:
+
+1. Examine the 19,000 unaffected descriptions for any words (ex: "NYC") or phrases (ex: "Orange County") that are capitalized even once. Then, analyze the 19,000 unaffected descriptions for the most common capitalization of each, and store the results in a hash. Iterate over each affected description for instances of commonly capitalized words and phrases.
+
+2. Check individual words in affected descriptions against a dictionary of common English words. Capitalize any words that are not present in the dictionary (ex: "Lemoore", "Sendero").
+
+3. Finally, implement the naive approach above to ensure that the first word of every sentence is capitalized.
+
+<hr>
+
+This multipronged approach is much more successful than the naive approach alone. Here are some examples of successfully corrected entries:
