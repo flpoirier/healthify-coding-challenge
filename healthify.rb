@@ -1,29 +1,41 @@
 require 'pg'
 require 'set'
 
-$capitalized_words_and_phrases = {}
-$descriptions_to_correct = []
-$all_correct_descriptions = ""
-$dictionary = File.open("./words.txt").read.split("\n").to_set
+$capitalized_words_and_phrases = {} # this will hold all words and phrases that are capitalized even once
+$descriptions_to_correct = [] # this will hold objects corresponding to entries that need correction (with id + description)
+$all_correct_descriptions = "" # this will hold a string containing all unaffected descriptions
+$dictionary = File.open("./words.txt").read.split("\n").to_set # this is a set of 350,000 English words
+
+# ------------------------------------------------------------------
 
 # the following code converts the data in the csv file to a postgresql database
 
 def create_db
   puts "\nCreating database...\n"
   conn = PG.connect(dbname: 'postgres')
-  conn.exec("CREATE DATABASE healthify")
-  conn = PG.connect(dbname: 'healthify')
+  conn.exec("CREATE DATABASE healthifycodingchallenge")
+  conn = PG.connect(dbname: 'healthifycodingchallenge')
   conn.exec("CREATE TABLE orgs ( id INT, description VARCHAR, PRIMARY KEY (id) )")
   conn.exec("COPY orgs(id, description) FROM '/Users/appacademy/Desktop/healthify-coding-challenge/jr_data_engineer_assignment.csv' DELIMITER ',' CSV HEADER")
 end
 
+# ------------------------------------------------------------------
+
+# this code drops the database (it's easier than doing it manually every time I rerun the code)
+
 def drop_db
   conn = PG.connect(dbname: 'postgres')
-  conn.exec("DROP DATABASE healthify")
+  conn.exec("DROP DATABASE IF EXISTS healthifycodingchallenge")
 end
+
+# ------------------------------------------------------------------
+
+# if it is affected, it is added to the $descriptions_to_correct array.
 
 def check_rows
   puts "\nProcessing entries...\n\n"
+
+  # queries the database for all rows
 
   conn = PG.connect(dbname: 'healthify')
   result = conn.exec("SELECT * FROM orgs")
@@ -31,22 +43,116 @@ def check_rows
   current_percent = 0
   total_keys = 20000
 
+  # iterates over every row
+
   result.each_with_index do |row,idx|
+    # prints current progress
     if idx > (current_percent * total_keys / 100)
       puts "#{current_percent}% checked..."
       current_percent += 1
     end
+    # each row is first sent through the process_description method
+    # if it's affected, it is added to the $descriptions_to_correct array
+    # if it's unaffected, the capitalized words/phrases in it are added to $capitalized_words_and_phrases
+    # and the entire description is added to $all_correct_descriptions
     process_description(row["id"], row["description"])
   end
 
   puts "\nEntries processed!\n"
 
+  # once all entries have either been set aside for correction or added to the master description string
+  # all words / phrases that are capitalized even once get checked against the master description string
+  # to see how they are most frequently capitalized (ex: "nyc" => "NYC", "orange county" => "Orange County")
   check_frequencies
 
+  # then, each affected description is corrected
   $descriptions_to_correct.each do |organization|
-    needs_fixing(organization[:id], organization[:description])
+    fix_description(organization[:id], organization[:description])
   end
 end
+
+# ------------------------------------------------------------------
+
+def process_description(id, description)
+  # separates description based on punctuation
+  sentences = split_into_sentences(description)
+
+  # needs_correcting is initially set to true.
+  # it will be switched to false if even one lowercase word is encountered
+  needs_correcting = true
+
+  # this will hold all words and subphrases that are capitalized
+  cap_words_and_phrases = []
+
+  sentences.each do |sentence|
+    sentence = sentence.split(" ")
+    phrase = ""
+    sentence.each_with_index do |word,idx|
+      # we are trying to identify any words or phrases that are capitalized.
+      # capitalized words are added to the phrase string until a lowercase word is identified
+      # at which point the phrase is added to the cap_words_and_phrases array and reset to an empty string
+      if word == word.downcase && word.to_i == 0 && idx == 1
+        # it's important to check word.to_i == 0 because, for example, "8" == "8.downcase"
+        # so, for a while, affected descriptions (ex: "Food Pantry Available For 75210 Only.") were marked as unaffected
+        # also, we are checking for idx == 1 because the first word in a sentence is always capitalized.
+        # if the second word (at idx 1) is also capitalized, I assume that it and the first word are part of a phrase
+        # otherwise, I reset the phrase string
+        needs_correcting = false
+        phrase = ""
+      elsif word == word.downcase && word.to_i == 0
+        needs_correcting = false
+        if phrase.length > 0
+          # slice is used to trim the final space from the phrase
+          cap_words_and_phrases << phrase.slice(0...-1)
+          phrase = ""
+        end
+      else
+        phrase += word += " "
+      end
+    end
+    # adds current phrase to the master array if it's not an empty string
+    phrase.length > 0 ? cap_words_and_phrases << phrase.slice(0...-1) : nil
+  end
+  if needs_correcting
+    # if no lowercase words were encountered, the id and description are addeded to $descriptions_to_correct
+    $descriptions_to_correct << {id: id, description: description}
+  else
+    # otherwise, the description is added to $all_correct_descriptions
+    # it's important to only add UNAFFECTED descriptions to this because it will be used to analyze correct capitalization
+    sentences.each do |sentence|
+      sentence = sentence.split(" ")
+      # for a while, the program was assuming that words like "provides", "offers" and "serves" should be capitalized
+      # because they're disproportionately likely to be the first word in the description (and therefore capitalized)
+      # I addressed that by making the first letter in a sentence lowercase (unless the second word is also capitalized)
+      if sentence[1] && (sentence[1] == sentence[1].downcase)
+        sentence[0][0] = sentence[0][0].downcase
+      end
+      $all_correct_descriptions += sentence.join(" ") + " "
+    end
+    # and finally, all capitalized words/phrases are added to the masterlist for processing
+    cap_words_and_phrases.each { |word| $capitalized_words_and_phrases[word.downcase] = word }
+  end
+end
+
+# ------------------------------------------------------------------
+
+# description is separated by punctuation ("!"/"."/","/"?")
+# separated strings are returned in an array
+# the point of this is to identify the limits of capitalized phrases
+# because a phrase will not continue past a punctuation mark
+# (ex: "University Of California, Orange County" == 2 separate phrases)
+
+def split_into_sentences(description)
+  description = description.split(". ")
+  description.map! { |sentence| sentence.split("! ") }.flatten!
+  description.map! { |sentence| sentence.split("? ") }.flatten!
+  description.map! { |sentence| sentence.split(", ") }.flatten!
+  # this removes the final punctuation mark (if it exists)
+  /\?|\.|\!/.match(description[-1][-1]) ? description[-1] = description[-1].slice(0...-1) : nil
+  description
+end
+
+# ------------------------------------------------------------------
 
 def check_frequencies
   puts "\nChecking for capitalization frequencies...\n\n"
@@ -92,53 +198,9 @@ def check_frequencies
   $capitalized_words_and_phrases = new_cap_words_and_phrases
 end
 
-def split_into_sentences(description)
-  description = description.split(". ")
-  description.map! { |sentence| sentence.split("! ") }.flatten!
-  description.map! { |sentence| sentence.split("? ") }.flatten!
-  description.map! { |sentence| sentence.split(", ") }.flatten!
-  /\?|\.|\!/.match(description[-1][-1]) ? description[-1] = description[-1].slice(0...-1) : nil
-  description
-end
+# ------------------------------------------------------------------
 
-def process_description(id, description)
-  sentences = split_into_sentences(description)
-  needs_correcting = true
-  cap_words_and_phrases = []
-  sentences.each do |sentence|
-    sentence = sentence.split(" ")
-    phrase = ""
-    sentence.each_with_index do |word,idx|
-      if word == word.downcase && word.to_i == 0 && idx == 1
-        needs_correcting = false
-        phrase = ""
-      elsif word == word.downcase && word.to_i == 0
-        needs_correcting = false
-        if phrase.length > 0
-          cap_words_and_phrases << phrase.slice(0...-1)
-          phrase = ""
-        end
-      else
-        phrase += word += " "
-      end
-    end
-    phrase.length > 0 ? cap_words_and_phrases << phrase.slice(0...-1) : nil
-  end
-  if needs_correcting
-    $descriptions_to_correct << {id: id, description: description}
-  else
-    sentences.each do |sentence|
-      sentence = sentence.split(" ")
-      if sentence[1] && (sentence[1] == sentence[1].downcase)
-        sentence[0][0] = sentence[0][0].downcase
-      end
-      $all_correct_descriptions += sentence.join(" ") + " "
-    end
-    cap_words_and_phrases.each { |word| $capitalized_words_and_phrases[word.downcase] = word }
-  end
-end
-
-def needs_fixing(id, description)
+def fix_description(id, description)
 
   new_description = description
   desc_and_punc = trim_punctuation(new_description)
@@ -160,8 +222,10 @@ def needs_fixing(id, description)
   puts description
   puts new_description.join(" ")
   puts "\n"
-  insert_correct_description(id, new_description.join(" ")) # if we haven't returned by this point, we know the description needs fixing
+  insert_correct_description(id, new_description.join(" "))
 end
+
+# ------------------------------------------------------------------
 
 def trim_punctuation(description)
   description = description.split(" ")
@@ -173,6 +237,8 @@ def trim_punctuation(description)
   { description: description.join(" "), punctuation: punctuation }
 end
 
+# ------------------------------------------------------------------
+
 def restore_punctuation(description, punctuation)
   description = description.split(" ")
   description.each_with_index do |word,idx|
@@ -180,6 +246,8 @@ def restore_punctuation(description, punctuation)
   end
   description.join(" ")
 end
+
+# ------------------------------------------------------------------
 
 def sentence_subsets(description)
   description = description.split(" ").map(&:downcase)
@@ -203,8 +271,12 @@ def sentence_subsets(description)
   description.join(" ")
 end
 
+# ------------------------------------------------------------------
+
 def insert_correct_description(id, description)
 end
+
+# ------------------------------------------------------------------
 
 drop_db
 create_db
