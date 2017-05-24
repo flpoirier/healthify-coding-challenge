@@ -211,6 +211,8 @@ def fix_description(id, description)
 
   new_description = description
   # returns unpunctuated sentence and a hash of punctuation
+  # the point of trimming punctuation is that sometimes a phrase will appear at the end of a sentence
+  # (ex: "I attend New York University.") and it won't be properly identified with punctuation attached
   desc_and_punc = trim_punctuation(new_description)
   # iterates through all substrings of the sentence checking if they occur in $capitalized_words_and_phrases
   sentences = sentence_subsets(desc_and_punc[:description])
@@ -322,6 +324,7 @@ end
 
 def export_db_to_csv
   $conn.exec("COPY (SELECT * FROM orgs) TO '/Users/appacademy/Desktop/healthify-coding-challenge/updated_csv_file.csv' DELIMITER ',' CSV HEADER")
+  puts "\nProcessing complete! Exported to updated_csv_file.csv."
 end
 
 # ------------------------------------------------------------------
@@ -330,5 +333,4 @@ drop_db
 create_db
 $conn = PG.connect(dbname: 'healthifycodingchallenge') # set this to a global so we don't have to reconnect 1,000+ times
 check_rows
-p $capitalized_words_and_phrases.sort
 export_db_to_csv
