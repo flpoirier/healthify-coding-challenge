@@ -1,0 +1,8 @@
+ID: 53661
+ORIGINAL DESCRIPTION: Greenpath Offers Debt Management Programs To Clients Who Will Benefit From Such Programs. In Addition, Greenpath Will Help With Housing Payment Advice And General Financial Advice.
+CORRECT DESCRIPTION: Greenpath offers debt management programs to clients who will benefit from such programs. In addition, Greenpath will help with housing payment advice and general financial advice.
+
+ID: 54697
+ORIGINAL DESCRIPTION: Full Day, Vpk
+CORRECT DESCRIPTION: Full day, Vpk
+

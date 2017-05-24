@@ -1,10 +1,13 @@
 require 'pg'
 require 'set'
 
+# IMPORTANT NOTE: change the file path on line 20 or the code will not run.
+
 $capitalized_words_and_phrases = {} # this will hold all words and phrases that are capitalized even once
 $descriptions_to_correct = [] # this will hold objects corresponding to entries that need correction (with id + description)
 $all_correct_descriptions = "" # this will hold a string containing all unaffected descriptions
 $dictionary = File.open("./words.txt").read.split("\n").to_set # this is a set of 350,000 English words
+File.open('./corrected_descriptions.txt', 'w') {|file| file.truncate(0) } # clears our corrected_descriptions.txt file
 
 # ------------------------------------------------------------------
 
@@ -30,14 +33,12 @@ end
 
 # ------------------------------------------------------------------
 
-# if it is affected, it is added to the $descriptions_to_correct array.
-
 def check_rows
   puts "\nProcessing entries...\n\n"
 
   # queries the database for all rows
 
-  conn = PG.connect(dbname: 'healthify')
+  conn = PG.connect(dbname: 'healthifycodingchallenge')
   result = conn.exec("SELECT * FROM orgs")
 
   current_percent = 0
@@ -154,6 +155,9 @@ end
 
 # ------------------------------------------------------------------
 
+# this method checks all words + phrases that are capitalized even once against the master description string
+# to see what the most frequent capitalization is
+
 def check_frequencies
   puts "\nChecking for capitalization frequencies...\n\n"
   current_percent = 0
@@ -194,22 +198,30 @@ def check_frequencies
     end
   end
   puts "\nFrequency checking complete!\n"
-  # then, the global variable is reset to
+  # then, the global variable is reset to the new hash
   $capitalized_words_and_phrases = new_cap_words_and_phrases
 end
 
 # ------------------------------------------------------------------
 
+# in this method, affected descriptions are corrected
+
 def fix_description(id, description)
 
+  puts description
+
   new_description = description
+  # returns unpunctuated sentence and a hash of punctuation
   desc_and_punc = trim_punctuation(new_description)
+  # iterates through all substrings of the sentence checking if they occur in $capitalized_words_and_phrases
   sentences = sentence_subsets(desc_and_punc[:description])
+  # sends back corrected sentence and punctuation hash to restore punctuation
   new_description = restore_punctuation(sentences, desc_and_punc[:punctuation])
 
   next_word_caps = true # the first word in the description should always be capitalized
   new_description = new_description.split(" ")
 
+  # finally, we ensure that the first word of each sentence in the new description is capitalized.
   new_description.each_with_index do |word,idx|
     if next_word_caps
       word[0] = word[0].upcase   # word gets capitalized if it's at beginning of a new sentence
@@ -219,13 +231,24 @@ def fix_description(id, description)
     new_description[idx] = word # finally, we replace the word in the description with the corrected word
   end
 
-  puts description
-  puts new_description.join(" ")
-  puts "\n"
+  # the corrected description is appended to our text file of all corrected descriptions
+  File.open('./corrected_descriptions.txt', 'a') do |file|
+    file.puts("ID: #{id}\nORIGINAL DESCRIPTION: #{description}\nCORRECT DESCRIPTION: #{new_description.join(" ")}\n\n")
+  end
+
+  # sends the updated description to be updated in the database
   insert_correct_description(id, new_description.join(" "))
 end
 
 # ------------------------------------------------------------------
+
+# this method trims punctuation from a string and sends back an unpunctuated string and a punctuation hash
+# the punctuation hash's keys are the indexes of the words in the string
+# and the values are any punctuation at the end of those words
+
+# ex: trim_punctuation("I like oranges, apples, and cake!") returns
+# { description: ("I like oranges apples and cake"),
+#   punctuation: {0: "", 1: "", 2: ",", 3: ",", 4: "", 5: "!"} }
 
 def trim_punctuation(description)
   description = description.split(" ")
@@ -239,6 +262,9 @@ end
 
 # ------------------------------------------------------------------
 
+# this reverses the above function by iterating over each word and adding the corresponding
+# string from the punctuation hash. (if it's unpunctuated, it just adds an empty string)
+
 def restore_punctuation(description, punctuation)
   description = description.split(" ")
   description.each_with_index do |word,idx|
@@ -249,18 +275,30 @@ end
 
 # ------------------------------------------------------------------
 
+# this splits each sentence EVERY POSSIBLE SUBSET and checks to see
+# if the subset occurs in $capitalized_words_and_phrases
+# ex: "i love nyc" breaks down into six subsets:
+# "i" / "i love" / "i love nyc" / "love" / "love nyc" / "nyc"
+
 def sentence_subsets(description)
+  # every word in the description is downcased because keys in $capitalized_words_and_phrases are all lowercase
   description = description.split(" ").map(&:downcase)
   idx1 = 0
   while idx1 < description.length
     idx2 = idx1
     while idx2 < description.length
       subset = description[idx1..idx2].join(" ").downcase
+      # checks the dictionary for the current subset
       correct_subset = $capitalized_words_and_phrases[subset]
+      # if subset exists, updates the description with the correct subset
       if correct_subset
         correct_subset.split(" ").each_with_index do |word,idx|
           description[idx1 + idx] = word
         end
+      # if subset does NOT exist in $capitalized_words_and_phrases, AND it's only one word long
+      # the dictionary (a txt file of 350k english words) is checked for the word.
+      # if it isn't in the dictionary, it's capitalized.
+      # this is a good way of capitalizing, for example, place names that only occur once (ex: "Lemoore", "Sendero")
       elsif idx1 == idx2
         description[idx1] = subset.capitalize unless $dictionary.include?(subset)
       end
@@ -274,21 +312,13 @@ end
 # ------------------------------------------------------------------
 
 def insert_correct_description(id, description)
+  $conn.exec("UPDATE orgs SET description = '#{description}' WHERE id = #{id}")
 end
 
 # ------------------------------------------------------------------
 
 drop_db
 create_db
+$conn = PG.connect(dbname: 'healthifycodingchallenge') # set this to a global so we don't have to reconnect 1,000+ times
 check_rows
-
 p $capitalized_words_and_phrases.sort
-# p $capitalized_words_and_phrases.length
-# p $descriptions_to_correct.length
-#
-# string = "This is my sentence. This is another sentence! This is a third sentence."
-# p split_into_sentences(string)
-
-# avg word length = 15
-# avg google queries = 120 per description
-# how to enter a google search -- https://www.google.com/search?q=yourquery
