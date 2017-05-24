@@ -10,11 +10,13 @@ The naive approach to the problem is pretty simple. After using the Ruby 'pg' ge
 
 The above solution is a decent baseline fix. Here are some examples of successfully corrected entries:
 
-"Provides Licensing Of Families Who Are Interested In Becoming Foster Families." =>
-"Provides licensing of families who are interested in becoming foster families."
+<ul>
+<li>"Provides Licensing Of Families Who Are Interested In Becoming Foster Families." =>
+"Provides licensing of families who are interested in becoming foster families."</li>
 
-"Food Pantries Store Food For Those In Need And Distribute It At An Accessible Location. Eligible Participants Can Access Food For Free." =>
-"Food pantries store food for those in need and distribute it at an accessible location. Eligible participants can access food for free."
+<li>"Food Pantries Store Food For Those In Need And Distribute It At An Accessible Location. Eligible Participants Can Access Food For Free." =>
+"Food pantries store food for those in need and distribute it at an accessible location. Eligible participants can access food for free."</li>
+</ul>
 
 However, there are still issues with proper nouns (specifically, acronyms, places, and organization names). Examples include:
 
