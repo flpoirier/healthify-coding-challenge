@@ -39,3 +39,15 @@ I chose a three-step approach to this problem:
 <hr>
 
 This multipronged approach is much more successful than the naive approach alone. Here are some examples of successfully corrected entries:
+
+[insert entries here]
+
+However, it does have limitations:
+
+1. The code takes more than 10 minutes to run. There are about 7,000 capitalized words and phrases, and I search the 19,000 entries for each of them three times (for capitalized, lowercase, and uppercase instances) -- more than 20,000 searches. This takes more than 8 minutes and is the major performance bottleneck.
+
+2. The unaffected entries are often poorly or inconsistently capitalized. Any common errors in the unaffected code will carry over into the capitalization analysis.
+
+3. Some words are both acronyms and normal words (ex: 'aids' / 'AIDS'; 'add' / 'ADD'). The code can't distinguish between them.
+
+4. Some phrases don't appear in the database enough to be analyzed. (Ex: "Seven Hills" only occurs once, and since it's a phrase composed of regular words, it doesn't get corrected.)
