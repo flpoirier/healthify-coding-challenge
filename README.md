@@ -58,6 +58,8 @@ This multipronged approach is much more successful than the naive approach alone
 "Reach Provides Aoda Services Including Assessment And Diagnostic Evaluations Alcohol And Drug Treatment Groups And Owi Education Groups." =>
 "Reach provides AODA services including assessment and diagnostic evaluations alcohol and drug treatment groups and OWI education groups."
 
+<hr>
+
 However, it does have limitations:
 
 1. The code takes more than 10 minutes to run. There are about 7,000 capitalized words and phrases, and I search the 19,000 entries for each of them three times (for capitalized, lowercase, and uppercase instances) -- more than 20,000 searches. This takes more than 8 minutes and is the major performance bottleneck.
@@ -75,3 +77,7 @@ It might be possible to address some of these concerns by analyzing even larger 
 <hr>
 
 Another approach I seriously considered was searching the internet for each affected description. A random sample suggests that at least half of them are accessible via Google Search -- this would be a good way of retrieving the original capitalization. The problem with this is that Google limits searches to 100 / day, and charges for any additional searches. (It's probably possible to get around this limit by using proxies, but I considered that beyond the scope of this coding challenge.)
+
+<hr>
+
+Thanks for the challenge -- I genuinely enjoyed it. Please let me know if there's anything I can correct or clarify.
