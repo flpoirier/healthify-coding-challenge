@@ -20,11 +20,13 @@ The above solution is a decent baseline fix. Here are some examples of successfu
 
 However, there are still issues with proper nouns (specifically, acronyms, places, and organization names). Examples include:
 
-"Provides Fire Protection And Prevention Services For The City Of Seven Hills. Offers Cpr Classes." =>
-"Provides fire protection and prevention services for the city of seven hills. Offers cpr classes."
+<ul>
+<li>"Provides Fire Protection And Prevention Services For The City Of Seven Hills. Offers Cpr Classes." =>
+"Provides fire protection and prevention services for the city of seven hills. Offers cpr classes."</li>
 
-"The Moyock Library Has A Popular Reading Collection For Adults, Teens And Children In Addition To Numerous Special Collections." =>
-"The moyock library has a popular reading collection for adults, teens and children in addition to numerous special collections."
+<li>"The Moyock Library Has A Popular Reading Collection For Adults, Teens And Children In Addition To Numerous Special Collections." =>
+"The moyock library has a popular reading collection for adults, teens and children in addition to numerous special collections."</li>
+</ul>
 
 <hr>
 
@@ -42,23 +44,25 @@ I chose a three-step approach to this problem:
 
 This multipronged approach is much more successful than the naive approach alone. Here are some examples of successfully corrected entries:
 
-"Provides Food Boxes On A Monthly Basis To Needy Families In Lemoore." =>
-"Provides food boxes on a monthly basis to needy families in Lemoore."
+<ul>
+<li>"Provides Food Boxes On A Monthly Basis To Needy Families In Lemoore." =>
+"Provides food boxes on a monthly basis to needy families in Lemoore."</li>
 
-"Provides Testing For Sexually Transmitted Diseases And Hiv. Referred Out For Hepatitis C Testing." =>
-"Provides testing for sexually transmitted diseases and HIV. Referred out for Hepatitis C testing."
+<li>"Provides Testing For Sexually Transmitted Diseases And Hiv. Referred Out For Hepatitis C Testing." =>
+"Provides testing for sexually transmitted diseases and HIV. Referred out for Hepatitis C testing."</li>
 
-"Provides Home Health And Hospice Services To Residents Of Alleghany, Ashe And Watauga Counties." =>
-"Provides home health and hospice services to residents of Alleghany, Ashe and Watauga counties."
+<li>"Provides Home Health And Hospice Services To Residents Of Alleghany, Ashe And Watauga Counties." =>
+"Provides home health and hospice services to residents of Alleghany, Ashe and Watauga counties."</li>
 
-"The Sendero Program Is Specifically For Latino Consumers Whose Primary Language Is Spanish." =>
-"The Sendero program is specifically for Latino consumers whose primary language is Spanish."
+<li>"The Sendero Program Is Specifically For Latino Consumers Whose Primary Language Is Spanish." =>
+"The Sendero program is specifically for Latino consumers whose primary language is Spanish."</li>
 
-"Food Pantry By Appointment On Tuesdays And Thursdays." =>
-"Food pantry by appointment on Tuesdays and Thursdays."
+<li>"Food Pantry By Appointment On Tuesdays And Thursdays." =>
+"Food pantry by appointment on Tuesdays and Thursdays."</li>
 
-"Reach Provides Aoda Services Including Assessment And Diagnostic Evaluations Alcohol And Drug Treatment Groups And Owi Education Groups." =>
-"Reach provides AODA services including assessment and diagnostic evaluations alcohol and drug treatment groups and OWI education groups."
+<li>"Reach Provides Aoda Services Including Assessment And Diagnostic Evaluations Alcohol And Drug Treatment Groups And Owi Education Groups." =>
+"Reach provides AODA services including assessment and diagnostic evaluations alcohol and drug treatment groups and OWI education groups."</li>
+</ul>
 
 <hr>
 
