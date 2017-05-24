@@ -4,7 +4,7 @@ This was a very interesting problem!
 
 The naive approach to the problem is pretty simple. After using the Ruby 'pg' gem to import the CSV file into a PostgreSQL database, we then retrieve the entire contents of the table in a single query. The data in each row gets sent to another function, where we split the description into words. If any of the words are not capitalized, we know the description was unaffected and return early from the function. Otherwise, we use regular expressions to identify sentences within the description. We then capitalize the first word of every sentence and downcase every other word, and update the database with the corrected description.
 
-(Considering that more than 1,000 rows in the database (or about 5%) were affected, this means that means that this program will make 1,000+ queries to the database. However, it still seems smarter to do them individually, so if an error occurs, it'll only affect a single entry.)
+(Considering that more than 1,000 rows in the database (or about 5%) were affected, this means that this program will make 1,000+ queries to the database. However, it still seems smarter to do them individually, so if an error occurs, it'll only affect a single entry.)
 
 <hr>
 
@@ -80,4 +80,4 @@ Another approach I seriously considered was searching the internet for each affe
 
 <hr>
 
-Thanks for the challenge -- I genuinely enjoyed it. Please let me know if there's anything I can correct or clarify.
+Thanks for the challenge! I genuinely enjoyed it. Please let me know if there's anything I can correct or clarify.

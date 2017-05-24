@@ -311,8 +311,16 @@ end
 
 # ------------------------------------------------------------------
 
+# updates the database with the corrected description
+
 def insert_correct_description(id, description)
   $conn.exec("UPDATE orgs SET description = '#{description}' WHERE id = #{id}")
+end
+
+# ------------------------------------------------------------------
+
+def export_db_to_csv
+
 end
 
 # ------------------------------------------------------------------
