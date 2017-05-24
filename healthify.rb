@@ -1,8 +1,10 @@
 require 'pg'
+require 'set'
 
 $capitalized_words_and_phrases = {}
 $descriptions_to_correct = []
 $all_correct_descriptions = ""
+$dictionary = File.open("./words.txt").read.split("\n").to_set
 
 # the following code converts the data in the csv file to a postgresql database
 
@@ -37,6 +39,8 @@ def check_frequencies
   total_keys = $capitalized_words_and_phrases.keys.length
   new_cap_words_and_phrases = {}
   $capitalized_words_and_phrases.keys.each_with_index do |phrase,idx|
+    # This method is the performance bottleneck. It takes about eight minutes.
+    # Printing progress updates shows that the program hasn't just frozen.
     if idx > (current_percent * 72)
       puts "#{current_percent}% checked..."
       current_percent += 1
@@ -160,6 +164,8 @@ def sentence_subsets(description)
         correct_subset.split(" ").each_with_index do |word,idx|
           description[idx1 + idx] = word
         end
+      elsif idx1 == idx2
+        description[idx1] = subset.capitalize unless $dictionary.include?(subset)
       end
       idx2 += 1
     end
@@ -171,15 +177,15 @@ end
 def insert_correct_description(id, description)
 end
 
-drop_db
-create_db
-check_rows
-
-p $capitalized_words_and_phrases.sort
+# drop_db
+# create_db
+# check_rows
+#
+# p $capitalized_words_and_phrases.sort
 # p $capitalized_words_and_phrases.length
 # p $descriptions_to_correct.length
-
-sentence_subsets("apple banana clementine")
+#
+p sentence_subsets("The Ossining Food Pantry Distributes Food To The Needy In The Parish Of Hall Of Trinity Episcopal Church.")
 
 # avg word length = 15
 # avg google queries = 120 per description
