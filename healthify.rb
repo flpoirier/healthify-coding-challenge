@@ -42,13 +42,16 @@ def check_frequencies
       current_percent += 1
     end
     phrase = phrase.split(" ")
-    downcase = phrase.map(&:downcase).join(" ")
-    downcase = $all_correct_descriptions.scan(/(?=#{downcase})/).count
-    capitalized = phrase.map(&:capitalize).join(" ")
-    capitalized = $all_correct_descriptions.scan(/(?=#{capitalized})/).count
-    uppercase = phrase.map(&:upcase).join(" ")
-    uppercase = $all_correct_descriptions.scan(/(?=#{uppercase})/).count
-    new_cap_words_and_phrases[phrase] = { downcase: downcase, upcase: uppercase, capital: capitalized }
+    downcase = $all_correct_descriptions.scan(/(?=#{phrase.map(&:downcase).join(" ")})/).count
+    capitalized = $all_correct_descriptions.scan(/(?=#{phrase.map(&:capitalize).join(" ")})/).count
+    uppercase = $all_correct_descriptions.scan(/(?=#{phrase.map(&:upcase).join(" ")})/).count
+    if (capitalized >= downcase) && (capitalized >= uppercase)
+      new_cap_words_and_phrases[phrase.join(" ")] = phrase.map(&:capitalize).join(" ")
+    elsif (uppercase >= downcase) && (uppercase >= capitalized)
+      new_cap_words_and_phrases[phrase.join(" ")] = phrase.map(&:upcase).join(" ")
+    else
+      new_cap_words_and_phrases[phrase.join(" ")] = phrase.map(&:downcase).join(" ")
+    end
   end
   puts "Frequency checking complete!"
   $capitalized_words_and_phrases = new_cap_words_and_phrases
@@ -95,28 +98,28 @@ def process_description(id, description)
 end
 
 def needs_fixing(id, description)
-  description = description.split(" ") # description is split into an array of individual words
-  new_description = []
-  next_word_caps = true # the first word in the description should always be capitalized
 
-  description.each_with_index do |word,idx|
-    word = word.downcase # default action is to downcase the word.
+  new_description = description
+  desc_and_punc = trim_punctuation(new_description)
+  sentences = sentence_subsets(desc_and_punc[:description])
+  new_description = restore_punctuation(sentences, desc_and_punc[:punctuation])
+
+  next_word_caps = true # the first word in the description should always be capitalized
+  new_description = new_description.split(" ")
+
+  new_description.each_with_index do |word,idx|
     if next_word_caps
-      word = word.capitalize # word gets capitalized if it's at beginning of a new sentence
+      word[0] = word[0].upcase   # word gets capitalized if it's at beginning of a new sentence
       next_word_caps = false # this variable resets
     end
     /\?|\.|\!/.match(word[-1]) ? next_word_caps = true : nil # if a word ends in "?", ".", or "!", we know it's at the end of a sentence, and the next word should be capitalized
     new_description[idx] = word # finally, we replace the word in the description with the corrected word
   end
 
-  new_description = new_description.join(" ")
-  desc_and_punc = trim_punctuation(new_description)
-  sentences = sentence_subsets(desc_and_punc[:description])
-  new_description = restore_punctuation(sentences, desc_and_punc[:punctuation])
-
-  p description.join(" ")
-  p new_description
-  insert_correct_description(id, description.join(" ")) # if we haven't returned by this point, we know the description needs fixing
+  puts description
+  puts new_description.join(" ")
+  puts "\n"
+  insert_correct_description(id, new_description.join(" ")) # if we haven't returned by this point, we know the description needs fixing
 end
 
 def trim_punctuation(description)
@@ -138,22 +141,22 @@ def restore_punctuation(description, punctuation)
 end
 
 def sentence_subsets(description)
-  description = description.split(" ")
-  # idx1 = 0
-  # while idx1 < description.length
-  #   idx2 = idx1
-  #   while idx2 < description.length
-  #     subset = description[idx1..idx2].join(" ").downcase
-  #     correct_subset = $capitalized_words_and_phrases[subset]
-  #     if correct_subset
-  #       correct_subset.split(" ").each_with_index do |word,idx|
-  #         description[idx1 + idx] = word
-  #       end
-  #     end
-  #     idx2 += 1
-  #   end
-  #   idx1 += 1
-  # end
+  description = description.split(" ").map(&:downcase)
+  idx1 = 0
+  while idx1 < description.length
+    idx2 = idx1
+    while idx2 < description.length
+      subset = description[idx1..idx2].join(" ").downcase
+      correct_subset = $capitalized_words_and_phrases[subset]
+      if correct_subset
+        correct_subset.split(" ").each_with_index do |word,idx|
+          description[idx1 + idx] = word
+        end
+      end
+      idx2 += 1
+    end
+    idx1 += 1
+  end
   description.join(" ")
 end
 
