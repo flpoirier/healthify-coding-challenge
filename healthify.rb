@@ -32,13 +32,25 @@ def check_rows
 end
 
 def check_frequencies
+  puts "Checking for capitalization frequencies..."
+  current_percent = 0
+  total_keys = $capitalized_words_and_phrases.keys.length
   new_cap_words_and_phrases = {}
-  $capitalized_words_and_phrases.keys.each do |word|
-    downcase = $all_correct_descriptions.scan(/(?=#{word.downcase})/).count
-    capitalized = $all_correct_descriptions.scan(/(?=#{word.capitalize})/).count
-    uppercase = $all_correct_descriptions.scan(/(?=#{word.downcase})/).count
-    new_cap_words_and_phrases[word] = { downcase: downcase, upcase: uppercase, capital: capitalized }
+  $capitalized_words_and_phrases.keys.each_with_index do |phrase,idx|
+    if idx > (current_percent * 72)
+      puts "#{current_percent}% checked..."
+      current_percent += 1
+    end
+    phrase = phrase.split(" ")
+    downcase = phrase.map(&:downcase).join(" ")
+    downcase = $all_correct_descriptions.scan(/(?=#{downcase})/).count
+    capitalized = phrase.map(&:capitalize).join(" ")
+    capitalized = $all_correct_descriptions.scan(/(?=#{capitalized})/).count
+    uppercase = phrase.map(&:upcase).join(" ")
+    uppercase = $all_correct_descriptions.scan(/(?=#{uppercase})/).count
+    new_cap_words_and_phrases[phrase] = { downcase: downcase, upcase: uppercase, capital: capitalized }
   end
+  puts "Frequency checking complete!"
   $capitalized_words_and_phrases = new_cap_words_and_phrases
 end
 
@@ -127,21 +139,21 @@ end
 
 def sentence_subsets(description)
   description = description.split(" ")
-  idx1 = 0
-  while idx1 < description.length
-    idx2 = idx1
-    while idx2 < description.length
-      subset = description[idx1..idx2].join(" ").downcase
-      correct_subset = $capitalized_words_and_phrases[subset]
-      if correct_subset
-        correct_subset.split(" ").each_with_index do |word,idx|
-          description[idx1 + idx] = word
-        end
-      end
-      idx2 += 1
-    end
-    idx1 += 1
-  end
+  # idx1 = 0
+  # while idx1 < description.length
+  #   idx2 = idx1
+  #   while idx2 < description.length
+  #     subset = description[idx1..idx2].join(" ").downcase
+  #     correct_subset = $capitalized_words_and_phrases[subset]
+  #     if correct_subset
+  #       correct_subset.split(" ").each_with_index do |word,idx|
+  #         description[idx1 + idx] = word
+  #       end
+  #     end
+  #     idx2 += 1
+  #   end
+  #   idx1 += 1
+  # end
   description.join(" ")
 end
 
