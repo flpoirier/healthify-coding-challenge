@@ -1,13 +1,14 @@
 require 'pg'
 require 'set'
 
-# IMPORTANT NOTE: change the file path on line 20 or the code will not run.
+# IMPORTANT NOTE: change the file path on lines 23 and 324 or the code will not run.
 
 $capitalized_words_and_phrases = {} # this will hold all words and phrases that are capitalized even once
 $descriptions_to_correct = [] # this will hold objects corresponding to entries that need correction (with id + description)
 $all_correct_descriptions = "" # this will hold a string containing all unaffected descriptions
 $dictionary = File.open("./words.txt").read.split("\n").to_set # this is a set of 350,000 English words
 File.open('./corrected_descriptions.txt', 'w') {|file| file.truncate(0) } # clears our corrected_descriptions.txt file
+File.open('./updated_csv_file.csv', 'w') {|file| file.truncate(0) } # clears our new .csv file
 
 # ------------------------------------------------------------------
 
@@ -208,8 +209,6 @@ end
 
 def fix_description(id, description)
 
-  puts description
-
   new_description = description
   # returns unpunctuated sentence and a hash of punctuation
   desc_and_punc = trim_punctuation(new_description)
@@ -319,8 +318,10 @@ end
 
 # ------------------------------------------------------------------
 
-def export_db_to_csv
+# and finally, export the corrected table to a new .csv file
 
+def export_db_to_csv
+  $conn.exec("COPY (SELECT * FROM orgs) TO '/Users/appacademy/Desktop/healthify-coding-challenge/updated_csv_file.csv' DELIMITER ',' CSV HEADER")
 end
 
 # ------------------------------------------------------------------
@@ -330,3 +331,4 @@ create_db
 $conn = PG.connect(dbname: 'healthifycodingchallenge') # set this to a global so we don't have to reconnect 1,000+ times
 check_rows
 p $capitalized_words_and_phrases.sort
+export_db_to_csv
