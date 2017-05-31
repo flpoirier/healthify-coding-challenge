@@ -13,20 +13,26 @@ def drop_db
   conn.exec("DROP DATABASE IF EXISTS mynewdb")
 end
 
+def add_location_column
+  conn = PG.connect(dbname: 'mynewdb')
+  conn.exec("ALTER TABLE orgs ADD location VARCHAR")
+end
+
 def process_entries
   conn = PG.connect(dbname: 'mynewdb')
   entries = conn.exec("SELECT * FROM orgs")
-  entries.each { |entry| print_location(entry["description"]) }
+  entries.each { |entry| print_location(entry["id"], entry["description"]) }
 end
 
-def print_location(description)
-  results = description.scan(/(the (?:(?!the).)+? area)/).flatten.join("; ")#.gsub(/ and /, '; ')
+def print_location(id,description)
+  results = description.scan(/the ((?:(?!the).)+? area)/).flatten.join("; ")#.gsub(/ and /, '; ')
   if results.split(" ").length.between?(3,7)
-    p description
-    p results
+    $conn.exec("UPDATE orgs SET location = '#{results}' WHERE id = #{id}")
   end
 end
 
 drop_db
 create_db
+add_location_column
+$conn = PG.connect(dbname: 'mynewdb')
 process_entries
