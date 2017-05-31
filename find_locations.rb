@@ -13,18 +13,34 @@ def drop_db
   conn.exec("DROP DATABASE IF EXISTS mynewdb")
 end
 
-def add_location_column
+def add_columns
   conn = PG.connect(dbname: 'mynewdb')
   conn.exec("ALTER TABLE orgs ADD location VARCHAR")
+  conn.exec("ALTER TABLE orgs ADD counties VARCHAR")
 end
 
 def process_entries
   conn = PG.connect(dbname: 'mynewdb')
   entries = conn.exec("SELECT * FROM orgs")
-  entries.each { |entry| print_location(entry["id"], entry["description"]) }
+  current_percent = 0
+  entries.each_with_index do |entry,idx|
+    if current_percent < (100 * idx / 20000)
+      puts "#{current_percent}% checked..."
+      current_percent += 1
+    end
+    find_location(entry["id"], entry["description"])
+    find_counties(entry["id"], entry["description"])
+  end
 end
 
-def print_location(id,description)
+def find_counties(id,description)
+  results = description.scan(/\s((?:[A-Z]\w*\s)*[A-Z]\w*) County/).flatten.uniq.join("; ")
+  if results.length > 0
+    $conn.exec("UPDATE orgs SET counties = '#{results}' WHERE id = #{id}")
+  end
+end
+
+def find_location(id,description)
   results = description.scan(/the ((?:(?!the).)+? area)/).flatten.join("; ")#.gsub(/ and /, '; ')
   if results.split(" ").length.between?(3,7)
     $conn.exec("UPDATE orgs SET location = '#{results}' WHERE id = #{id}")
@@ -33,6 +49,6 @@ end
 
 drop_db
 create_db
-add_location_column
+add_columns
 $conn = PG.connect(dbname: 'mynewdb')
 process_entries
